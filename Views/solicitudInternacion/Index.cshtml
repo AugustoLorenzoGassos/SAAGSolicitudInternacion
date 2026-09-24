@@ -1,0 +1,116 @@
+﻿@model solicitudInternacion.Models.SolicitudInternacion
+
+@{
+    ViewData["Title"] = "Permisos de internación - Solicitud en línea";
+}
+
+<form action="/solicitudInternacion/Index" method="post">
+
+    @Html.HiddenFor(model => model.IdSolicitudInternacion)
+    @Html.AntiForgeryToken()
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header bg-secondary bg-gradient text-white rounded-top-2">
+                <h4 class="m-0">Permisos de internación</h4>
+            </div>
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-12 col-md-6">
+                        <label for="fechaSolicitud">Fecha de Solicitud:</label>
+                        <input id="fechaSolicitud" name="FechaSolicitud" type="date" class="form-control" placeholder="fecha de solicitud" />
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label for="nombreSolicitante">Nombre de quien solicita:</label>
+                        <input id="nombreSolicitante" name="NombreSolicitante" type="text" class="form-control" placeholder="Nombre de quien solicita" />
+                    </div>
+                </div>
+                <h6 class="mt-3 mb-0"><strong>Datos del traslado</strong></h6>
+                <hr />
+                <div class="row">
+                    <div class="col-12 col-md-4">
+                        <label for="tipoGanado">Tipo de Ganado:</label>
+                        <select id="tipoGanado" name="TipoGanado" class="form-control">
+                            <option value="0">Seleccione...</option>
+                            <option value="1">Bovino</option>
+                            <option value="2">Ovino</option>
+                            <option value="3">Caprino</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="motivoInternacion">Motivo de Internación:</label>
+                        <select id="motivoInternacion" name="MotivoTraslado" class="form-control">
+                            <option value="0">Seleccione...</option>
+                            <option value="1">Descanso</option>
+                            <option value="2">Reproducción</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="certificadoZoosanitario">Certificado zoosanitario para movilización:</label>
+                        <input id="certificadoZoosanitario" name="CertificadoMovilizacion" type="text" class="form-control" placeholder="Certificado zoosanitario para movilización" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-4">
+                        <label for="origenTraslado">Origen:</label>
+                        <input id="origenTraslado" name="Origen" type="text" class="form-control" placeholder="Origen" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="destinoTraslado">Destino:</label>
+                        <input id="destinoTraslado" name="Destino" type="text" class="form-control" placeholder="Destino" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="nombreUpp">Nombre de la UPP:</label>
+                        <input id="nombreUpp" name="ClaveUpp" type="text" class="form-control " placeholder="UPP" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-4">
+                        <label for="hembras">Hembras:</label>
+                        <input id="hembras" name="HembrasMovilizar" type="number" class="form-control" placeholder="Hembras" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="machos">Machos:</label>
+                        <input id="machos" name="MachosMovilizar" type="number" class="form-control" placeholder="Machos" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="total">Total:</label>
+                        <input id="total" name="Total" type="text" class="form-control " placeholder="Total" readonly />
+                    </div>
+                </div>
+                <h6 class="mt-3 mb-0"><strong>Datos del vehículo</strong></h6>
+                <hr />
+                <div class="row">
+                    <div class="col-12 col-md-4">
+                        <label for="numeroPlacas">Número de Placas:</label>
+                        <input id="numeroPlacas" name="PlacasVehiculo" type="text" class="form-control" placeholder="Número de Placas" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="marcaVehiculo">Marca del Vehículo:</label>
+                        <input id="marcaVehiculo" name="MarcaVehiculo" type="text" class="form-control" placeholder="Marca del Vehículo" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label for="nombreChofer">Nombre del Chofer:</label>
+                        <input id="nombreChofer" name="NombreChofer" type="text" class="form-control " placeholder="Nombre del Chofer" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-4">
+                        <label for="numeroFlejes">Número de Flejes:</label>
+                        <input id="numeroFlejes" name="NumeroFlejes" type="text" class="form-control" placeholder="Número de Flejes" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                    </div>
+                    <div class="col-12 col-md-4">
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-light">
+                <button type="submit" class="btn btn-light">
+                    <i class="fa fa-save me-2" aria-hidden="true"></i>Enviar Solicitud
+                </button>
+            </div>
+        </div>
+    </div>
+
+</form>

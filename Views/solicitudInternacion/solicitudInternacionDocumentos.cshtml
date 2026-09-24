@@ -1,0 +1,144 @@
+﻿
+@{
+    ViewData["Title"] = "Permisos de internación - Cargar documentos";
+}
+
+<div class="container mt-3">
+    <div class="card">
+        <div class="card-header bg-secondary bg-gradient text-white rounded-top-2">
+            <h4 class="m-0">Permisos de internación - Cargar de documentos</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-md-6">
+                    <select id="cmbDocumentos" class="form-select"></select>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="upload-container">
+                        <input type="file" id="documentoInput" class="file-input-hidden" onchange="mostrarNombreArchivo()">
+                        <label for="documentoInput" class="btn-search bg-secondary">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            Buscar documento
+                        </label>
+                        <span id="nombreArchivo" class="file-name">Ningún archivo seleccionado</span>
+                    </div>
+                    <label id="resultado" class="p-3 alert w-100 mt-2 text-center"></label>
+                </div>
+            </div>
+            <textarea id="observaciones" class="form-control mt-3 d-none" rows="3" placeholder="Observaciones (opcional)"></textarea>
+            <button id="BtnSubir" type="button" class="btn btn-secondary disabled mt-3" onclick="subirDocumento()">
+                <i class="fa fa-upload me-2" aria-hidden="true"></i>Subir documento
+            </button>
+        </div>
+        <div class="card-footer">
+            <p id="mensajeDocumentos" class="alert alert-dark p-2 text-center mt-2 d-none">Documentos cargados</p>
+            <ul id="listaDocumentos" class="list-group d-none">
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function() {
+        cargarDocumetos();
+    });
+
+    function mostrarNombreArchivo() {
+        const input = document.getElementById('documentoInput');
+        const labelNombre = document.getElementById('nombreArchivo');
+
+        if (input.files && input.files.length > 0) {
+            labelNombre.textContent = input.files[0].name;
+            labelNombre.classList.add('loaded');
+            document.getElementById('BtnSubir').classList.remove('disabled');
+            document.getElementById('observaciones').classList.remove('d-none');
+        } else {
+            labelNombre.textContent = 'Ningún archivo seleccionado';
+            labelNombre.classList.remove('loaded');
+            document.getElementById('BtnSubir').classList.add('disabled');
+            document.getElementById('observaciones').classList.add('d-none');
+            document.getElementById('observaciones').innerHTML = '';
+        }
+    }
+
+    async function subirDocumento() {
+    
+        const input = document.getElementById('documentoInput');
+        const archivo = input.files[0];
+
+        const formData = new FormData();
+        formData.append('archivo', archivo); // 'archivo' debe coincidir con el nombre del parámetro en C#
+        formData.append('idDocumento', document.getElementById('cmbDocumentos').value); // Enviar ID del documento
+        formData.append('idSolicitud', @Model.IdSolicitudInternacion); // Enviar ID de la solicitud
+        formData.append('observaciones', document.getElementById('observaciones').value); // Enviar observaciones
+
+        try {
+            const response = await fetch('/solicitudInternacion/SubirDocumento', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const resultado = await response.json();
+                document.getElementById('resultado').classList.add('alert-success');
+                document.getElementById('resultado').innerHTML = resultado.mensaje || "Archivo subido correctamente.";
+                cargarListaDocumentos();
+            } else {
+                const error = await response.json();
+                document.getElementById('resultado').classList.add('alert-warning');
+                document.getElementById('resultado').innerHTML = resultado.mensaje || "Ocurrió un problema al subir el archivo.";
+            }
+        } catch (err) {
+            console.error("Error en la solicitud:", err);
+            document.getElementById('resultado').classList.add('alert-danger');
+            document.getElementById('resultado').innerHTML = "Ocurrió un error al intentar conectar con el servidor";
+        }
+
+    }
+    
+    async function cargarListaDocumentos() {
+        
+        try {
+            const response = await fetch(`/solicitudInternacion/SolicitudDocumentosCargados?idSolicitud=${@Model.IdSolicitudInternacion}`);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.mensaje || "Error al obtener la información.");
+            }
+            const documentos = await response.json();
+            // Validar si la lista viene vacía
+            if (documentos.length === 0) {
+                ul.innerHTML = `<li class="list-group-item text-muted">No hay documentos registrados para esta solicitud.</li>`;
+                document.getElementById('listaDocumentos').classList.remove('d-none');
+                return;
+            } else {
+                document.getElementById('listaDocumentos').classList.remove('d-none');
+                document.getElementById('mensajeDocumentos').classList.remove('d-none');
+                document.getElementById('listaDocumentos').innerHTML='';
+                document.getElementById('observaciones').value = '';
+                document.getElementById('BtnSubir').classList.add('disabled');
+                //document.getElementById('resultado').classList.remove('alert-success', 'alert-warning', 'alert-danger');
+                //document.getElementById('resultado').innerHTML = '';
+                // Recorrer los registros y crear los elementos <li>
+                documentos.forEach(doc => {
+                    const fecha = doc.fechaCarga ? new Date(doc.fechaCarga).toLocaleDateString() : 'N/A';
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-start';
+                    li.innerHTML = `
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">
+                                <i class="fa-regular fa-file-lines me-2" aria-hidden="true"></i>${doc.nombreDocumento ?? 'Documento sin nombre'} - ${doc.tipoDocumento ?? 'Archivo descripción del documento'}
+                            </div>
+                            <small class="text-muted">${doc.observaciones ?? 'Sin observaciones'}</small>
+                        </div>
+                        <span class="badge bg-secondary rounded-pill">${fecha}</span>
+                    `;
+                    document.getElementById('listaDocumentos').appendChild(li);
+                });
+            }
+        } catch (err) {
+            console.error("Error en la solicitud:", err);
+        }
+    }
+
+</script>
