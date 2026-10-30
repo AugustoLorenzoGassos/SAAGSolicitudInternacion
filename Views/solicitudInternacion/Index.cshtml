@@ -4,9 +4,82 @@
     ViewData["Title"] = "Permisos de internación - Solicitud en línea";
 }
 
-<form action="/solicitudInternacion/Index" method="post">
+<!-- Modal para mostrar detalles de un beneficiario -->
+<div class="modal" id="modalBuscarUPP" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitulo">Agregar UPP/PSG</h5>
+            </div>
+            <div class="modal-body" id="modalCuerpo">
+
+                <div id="alertaAltaUPP">
+                    <label class="alert alert-warning">
+                        <i class="fa fa-exclamation-triangle me-2" aria-hidden="true"></i>
+                        <span>La UPP/PSG que se mando a validar no exisste en el catálogo. Para continuar con el trámite deberá de ingresar los datos de la UPP/PSG</span>
+                        <span class="d-block text-center mt-3"><a href="#" class="text-decoration-none" onclick="ocultarSecciones();">Continuar con el trámite</a></span>
+                    </label>
+                </div>
+
+                <div id="datosAltaUPP" class="d-none">
+                    <div class="row">
+                        <div class="col-12 p-2"
+                            <label for="txtBuscarUPP">Clave de UPP/PSG:</label>
+                            <input type="text" id="txtBuscarUPP" class="form-control w-100 me-0 me-md-2" maxlenght="12" placeholder="Escibe la clave de la UPP/PSG" />
+                            @*<button type="button" class="btn btn-success mt-2 mt-md-0"><i class="fa fa-check me-2" aria-hidden="true"></i>Validar</button>*@
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 p-2"
+                            <label for="nombreUPP">Nombre e la UPP/PSG:</label>
+                            <input type="text" id="nombreUPP" class="form-control w-100 me-0 me-md-2" maxlenght="12" placeholder="Escibeel nombre de la UPP/PSG" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-md-6 p-2"
+                            <label for="cmbMunicipio">Municipio:</label>
+                            <select id="cmbMunicipio" class="form-select">
+                                <option value="000">Seleccione el municipio ...</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6 p-2"
+                            <label for="cmbLocalidad">Localidad:</label>
+                            <select id="cmbLocalidad" class="form-select">
+                                <option value="000">Seleccione la localidad ...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 p-2"
+                            <label for="nombreProductor">Nombre del productor (<sup >*</sup>En caso de  no ser encintrado en la lista se agregaría al catálogo):</label>
+                            <input type="text" id="nombreProductor" class="form-control w-100 me-0 me-md-2" maxlenght="12" placeholder="Escibeel nombre de la UPP/PSG" />
+                            <table class="table table-dark mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Nombre del productor</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" id="modalPie">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form action="/solicitudInternacion/Index" id="formSolicitud" method="post" novalidate>
 
     @Html.HiddenFor(model => model.IdSolicitudInternacion)
+    @Html.HiddenFor(model => model.FechaCaptura)
+    @Html.HiddenFor(model => model.FechaRecepcion)
+    @Html.HiddenFor(model => model.StatusSolicitud)
     @Html.AntiForgeryToken()
 
     <div class="container">
@@ -15,102 +88,210 @@
                 <h4 class="m-0">Permisos de internación</h4>
             </div>
             <div class="card-body p-3">
+
                 <div class="row">
                     <div class="col-12 col-md-6">
                         <label for="fechaSolicitud">Fecha de Solicitud:</label>
-                        <input id="fechaSolicitud" name="FechaSolicitud" type="date" class="form-control" placeholder="fecha de solicitud" />
+                        <input id="fechaSolicitud" name="FechaSolicitud" type="date" class="form-control" placeholder="fecha de solicitud" required />
                     </div>
                     <div class="col-12 col-md-6">
-                        <label for="nombreSolicitante">Nombre de quien solicita:</label>
-                        <input id="nombreSolicitante" name="NombreSolicitante" type="text" class="form-control" placeholder="Nombre de quien solicita" />
                     </div>
                 </div>
-                <h6 class="mt-3 mb-0"><strong>Datos del traslado</strong></h6>
-                <hr />
-                <div class="row">
-                    <div class="col-12 col-md-4">
-                        <label for="tipoGanado">Tipo de Ganado:</label>
-                        <select id="tipoGanado" name="TipoGanado" class="form-control">
-                            <option value="0">Seleccione...</option>
-                            <option value="1">Bovino</option>
-                            <option value="2">Ovino</option>
-                            <option value="3">Caprino</option>
-                        </select>
+
+                <div class="row mt-3">
+                    <div class="col-12 col-md-6 p-2">
+                        <h4 class="w-100 text-center border-bottom mb-2 p-2">Datos del origen</h4>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="input-group">
+                                    <div class="input-group-text" data-bs-toggle="tooltip" data-bs-title="Validar clave de UPP/PSG del origen" id="btnGroupAddonO"><i class="fa fa-check" aria-hidden="true" onclick="buscarUpp('O');" style="cursor: pointer;"></i></div>
+                                    <input type="text" id="txtUPPOrigen" name="origen" class="form-control" placeholder="Clave de UPP/PSG del origen" aria-label="Input group example" aria-describedby="btnGroupAddonO" required >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row d-none mt-2" id="datosOrigen">
+                            <div class="col-12">
+                                <label id="txtNombreRemitente"></label>
+                            </div>
+                            <div class="col-12">
+                                <label id="txtPredioRemitente"></label>
+                            </div>
+                            <div class="col-12">
+                                <label id="txtUbicacionRemitente"></label>
+                            </div>
+                            <div class="col-12">
+                                <label id="txtMunicipioRemitente"></label>
+                            </div>
+                            <div class="col-12">
+                                <label id="txtEstadoRemitente"></label>
+                            </div>
+                            <div class="col-12">
+                                <label id="txtZonaRemitente"></label>
+                            </div>
+                            <div class="col-12">
+                                <label id="txtStatusRemitente"></label>
+                            </div>
+                        </div>
+                        <h5 id="alertaOrigen" class="d-none m-3 text-center alert alert-success"></h5>
                     </div>
-                    <div class="col-12 col-md-4">
-                        <label for="motivoInternacion">Motivo de Internación:</label>
-                        <select id="motivoInternacion" name="MotivoTraslado" class="form-control">
-                            <option value="0">Seleccione...</option>
-                            <option value="1">Descanso</option>
-                            <option value="2">Reproducción</option>
-                        </select>
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label for="certificadoZoosanitario">Certificado zoosanitario para movilización:</label>
-                        <input id="certificadoZoosanitario" name="CertificadoMovilizacion" type="text" class="form-control" placeholder="Certificado zoosanitario para movilización" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12 col-md-4">
-                        <label for="origenTraslado">Origen:</label>
-                        <input id="origenTraslado" name="Origen" type="text" class="form-control" placeholder="Origen" />
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label for="destinoTraslado">Destino:</label>
-                        <input id="destinoTraslado" name="Destino" type="text" class="form-control" placeholder="Destino" />
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label for="nombreUpp">Nombre de la UPP:</label>
-                        <input id="nombreUpp" name="ClaveUpp" type="text" class="form-control " placeholder="UPP" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12 col-md-4">
-                        <label for="hembras">Hembras:</label>
-                        <input id="hembras" name="HembrasMovilizar" type="number" class="form-control" placeholder="Hembras" />
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label for="machos">Machos:</label>
-                        <input id="machos" name="MachosMovilizar" type="number" class="form-control" placeholder="Machos" />
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label for="total">Total:</label>
-                        <input id="total" name="Total" type="text" class="form-control " placeholder="Total" readonly />
-                    </div>
-                </div>
-                <h6 class="mt-3 mb-0"><strong>Datos del vehículo</strong></h6>
-                <hr />
-                <div class="row">
-                    <div class="col-12 col-md-4">
-                        <label for="numeroPlacas">Número de Placas:</label>
-                        <input id="numeroPlacas" name="PlacasVehiculo" type="text" class="form-control" placeholder="Número de Placas" />
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label for="marcaVehiculo">Marca del Vehículo:</label>
-                        <input id="marcaVehiculo" name="MarcaVehiculo" type="text" class="form-control" placeholder="Marca del Vehículo" />
-                    </div>
-                    <div class="col-12 col-md-4">
-                        <label for="nombreChofer">Nombre del Chofer:</label>
-                        <input id="nombreChofer" name="NombreChofer" type="text" class="form-control " placeholder="Nombre del Chofer" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12 col-md-4">
-                        <label for="numeroFlejes">Número de Flejes:</label>
-                        <input id="numeroFlejes" name="NumeroFlejes" type="text" class="form-control" placeholder="Número de Flejes" />
-                    </div>
-                    <div class="col-12 col-md-4">
-                    </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-6 p-2">
+                        <h4 class="w-100 text-center border-bottom mb-2 p-2">Datos del destino</h4>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="input-group">
+                                    <div class="input-group-text" id="btnGroupAddonD" data-bs-toggle="tooltip" data-bs-title="Validar clave de UPP/PSG del destino"><i class="fa fa-check" aria-hidden="true" onclick="buscarUpp('D');" style="cursor: pointer;"></i></div>
+                                    <input type="text" id="txtUPPDestino" name="destino" class="form-control" placeholder="Clave de UPP/PSG del destino" aria-label="Input group example" aria-describedby="btnGroupAddonD" required >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row d-none mt-2" id="datosDestino">
+                            <div class="col-12">
+                                <label id="txtNombreDestino"></label>
+                            </div>
+                            <div class="col-12">
+                                <label id="txtPredioDestino"></label>
+                            </div>
+                            <div class="col-12">
+                                <label id="txtUbicacionDestino"></label>
+                            </div>
+                            <div class="col-12">
+                                <label id="txtMunicipioDestino"></label>
+                            </div>
+                            <div class="col-12">
+                                <label id="txtEstadoDestino"></label>
+                            </div>
+                            <div class="col-12">
+                                <label id="txtZonaDestino"></label>
+                            </div>
+                            <div class="col-12">
+                                <label id="txtStatusDestino"></label>
+                            </div>
+                        </div>
+                        <h5 id="alertaDestino" class="d-none m-3 text-center alert alert-success"></h5>
                     </div>
                 </div>
+
+                <div id="continuarTramite" class="d-none">
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <label for="correoElectronico" data-bs-toggle="tooltip" data-bs-title="Correo electrónico para recibir notificaciones del trámite">Correo electrónico:</label>
+                            <input id="correoElectronico" name="correoElectronico" type="email" class="form-control" placeholder="usuario@ejemplo.com" />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label for="numeroCelular" data-bs-toggle="tooltip" data-bs-title="Número de celular para recibir notificaciones del trámite">Número de celular:</label>
+                            <input id="numeroCelular" name="numeroCelular" type="text" class="form-control" placeholder="9999999999 (Sólo números sin espacios o guiones a 10 posiciones)" />
+                        </div>
+                    </div>
+
+                    <h6 class="mt-3 mb-0 text-center"><strong>DATOS DE LA MOVILIZACIÓN</strong></h6>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12 col-md-4">
+                            <label for="tipoMovilizacion">Motivo:</label>
+                            <input type="text" id="tipoMovilizacion" class="form-control" readonly />
+                            <input type="hidden" id="motivoTraslado" name="motivoTraslado" readonly />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label for="guiaTraslado">Guía de traslado:</label>
+                            <input id="guiaTraslado" name="guiaTraslado" type="text" class="form-control" placeholder="Certificado zoosanitario para movilización" required />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label for="folioREEMO">REEMO:</label>
+                            <input id="folioREEMO" name="folioREEMO" type="text" class="form-control" placeholder="Certificado zoosanitario para movilización" required />
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12 col-md-4">
+                            <label for="tipoGanado">Tipo de Ganado:</label>
+                            <select id="tipoGanado" name="TipoGanado" class="form-control" required>
+                                <option value="0">Seleccione...</option>
+                                <option value="1">Bovino</option>
+                                <option value="2">Ovino</option>
+                                <option value="3">Caprino</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label for="hembras">Hembras:</label>
+                            <input id="hembras" name="HembrasMovilizar" type="number" class="form-control" placeholder="Hembras" value="0" required />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label for="machos">Machos:</label>
+                            <input id="machos" name="MachosMovilizar" type="number" class="form-control" placeholder="Machos" value="0" required />
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12 col-md-4">
+                            <label for="marcaVehiculo">Marca del Vehículo:</label>
+                            <input id="marcaVehiculo" name="marcaVehiculo" type="text" class="form-control" placeholder="Marca del Vehículo" required />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label for="numeroPlacas">Número de Placas:</label>
+                            <input id="numeroPlacas" name="PlacasVehiculo" type="text" class="form-control" placeholder="Número de Placas" required />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label for="nombreChofer">Nombre del Chofer:</label>
+                            <input id="nombreChofer" name="NombreChofer" type="text" class="form-control " placeholder="Nombre del Chofer" required />
+                        </div>
+                        <div class="mt-2 mb-2">
+                            <label for="puntosVerificacion">Puntos de verificación en la ruta de ingreso y/o tránsito:</label>
+                            <input id="puntosVerificacion" name="puntosVerificacion" type="text" class="form-control w-100" placeholder="Puntos de verificación en la ruta de ingreso y/o tránsito" required />
+                        </div>
+                    </div>
+
+                    <h6 class="mt-3 mb-0 text-center"><strong>REQUERIMIENTOS PARA LA MOVILIZACIÓN</strong></h6>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12 col-md-4">
+                            <label for="certificadoMovilizacion">Certificado Zoosanitario:</label>
+                            <input id="certificadoMovilizacion" name="certificadoMovilizacion" type="text" class="form-control " placeholder="Certificado zoosanitario" required />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label for="dictamenTB">Dictamen negativo de Tb:</label>
+                            <input id="dictamenTB" name="dictamenTB" type="text" class="form-control " placeholder="Dictamen negativo de Tb" required />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label for="dictamenBR">Dictamen negativo de Br:</label>
+                            <input id="dictamenBR" name="dictamenBR" type="text" class="form-control " placeholder="Dictamen negativo de Br" required />
+                        </div>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col-12 col-md-4">
+                            <label for="numeroFlejes">Folio de fleje:</label>
+                            <input id="numeroFlejes" name="numeroFlejes" type="text" class="form-control " placeholder="Vehículo flejado" required />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label for="factura">Factura:</label>
+                            <input id="factura" name="factura" type="text" class="form-control " placeholder="Factura" required />
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <label for="marcajeCN">Marcaje CN:</label>
+                            <input id="marcajeCN" name="marcajeCN" type="text" class="form-control " placeholder="Marcaje CN" required />
+                        </div>
+                    </div>
+                </div>
+
+                <div id="divErrores" class="alert alert-warning m-5 fs-5 d-none" role="alert">
+                    <span class="d-block text-center"><i class="fa fa-exclamation-triangle me-1" aria-hidden="true"></i>Lista de errores</span>
+                    <ul class="mt-2" id="listaErrores">
+                    </ul>
+                </div>
+
             </div>
+
             <div class="card-footer bg-light">
-                <button type="submit" class="btn btn-light">
-                    <i class="fa fa-save me-2" aria-hidden="true"></i>Enviar Solicitud
+                <button id="btnGuardar" type="submit" class="btn btn-light disabled">
+                    <i class="fa fa-save me-2" aria-hidden="true"></i>Continuar con la carga de documentos
                 </button>
             </div>
+
         </div>
     </div>
 
 </form>
+
+<script>
+
+    function ocultarSecciones(){
+        document.getElementById('alertaAltaUPP').classList.add('d-none');
+        document.getElementById('datosAltaUPP').classList.remove("d-none");
+    }
+
+</script>

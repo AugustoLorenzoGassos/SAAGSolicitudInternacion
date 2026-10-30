@@ -78,3 +78,24 @@ body {
     font-style: normal;
     font-weight: 500;
 }
+
+input:invalid {
+    box-shadow: none;
+}
+
+.form-control.is-invalid {
+    border-color: #a71d2a;
+}
+
+.invalid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #a71d2a;
+}
+
+/* Muestra el texto automáticamente cuando el input tiene la clase de error */
+.form-control.is-invalid ~ .invalid-feedback {
+    display: block;
+}

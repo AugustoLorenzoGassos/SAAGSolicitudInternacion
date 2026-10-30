@@ -17,6 +17,10 @@ public partial class SolicitudInternacionDocumento
 
     public DateTime? FechaCarga { get; set; }
 
+    public string? TipoMime { get; set; }
+
+    public bool? StatusDocumento { get; set; }
+
     public virtual CatalogoDocumento? IdDocumentoNavigation { get; set; }
 
     public virtual SolicitudInternacion? IdSolicitudInternacionNavigation { get; set; }

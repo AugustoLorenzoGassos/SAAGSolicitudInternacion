@@ -4,20 +4,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
+    <!-- Usamos la versión local de Bootstrap que trae tu proyecto -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <!--Bootstarp-->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
-    <!--font-awsome para los íconos-->
+    <!-- Font-awesome para los íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 
 <body>
     <!--Encabezado dentro del body-->
     <header class="border-0">
         <!--Encabezado de logotipos-->
-        <div class="container-fluid d-flex flex-column flex-md-row w-100 justify-content-between">
+        <div class="container-fluid d-flex flex-row w-100 justify-content-between">
             <div class="m-2 py-2 px-3">
                 <img src="~/logo-sedarpa.png" style="width: 50%; height: auto;">
             </div>
@@ -25,7 +24,7 @@
                 <img src="~/LogoOficialPorAmorVer.png" style="width: 50%; height: auto;" />
             </div>
         </div>
-        <p class="fw-bolder w-100 p-3 text-center" style="color:#691933; text-align:center">SUBDIRECCIÓN DE SISTEMAS DE PRODUCCIÓN REGIONAL<br />SISTEMA DE AUTOMATIZACIÓN Y GESTIÓN DE APOYOS AGROPECUARIO (SAGAA)</p>
+        <p class="fw-bolder w-100 p-3 text-center" style="color:#691933; text-align:center">DIRECCIÓN GENERAL DE GANADERÍA<br />SISTEMA DE AUTOMATIZACIÓN Y GESTIÓN DE APOYOS AGROPECUARIO (SAGAA)</p>
     </header>
     <!--Espacio pafra el render de las páginas hijas-->
     <div class="container w-100">
@@ -39,14 +38,14 @@
         </div>
     </footer>
 
-    <!--Inserción de librerias de java script-->
+    <!-- Inserción de librerías de JavaScript en orden correcto -->
     <script src="~/lib/jquery/dist/jquery.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.js"></script> <!-- Asegúrate de usar el bundle para que incluya Popper -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Tu script va después de que Bootstrap y las librerías ya se cargaron -->
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 

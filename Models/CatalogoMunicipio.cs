@@ -17,6 +17,8 @@ public partial class CatalogoMunicipio
 
     public string? PartidoAlcalde { get; set; }
 
+    public string? TipoZona { get; set; }
+
     public virtual ICollection<CatalogoLocalidade> CatalogoLocalidades { get; set; } = new List<CatalogoLocalidade>();
 
     public virtual CatalogoDistritosLocale? IdDistritoElectoralNavigation { get; set; }

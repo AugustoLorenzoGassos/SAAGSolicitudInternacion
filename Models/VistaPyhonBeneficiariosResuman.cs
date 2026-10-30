@@ -9,5 +9,7 @@ public partial class VistaPyhonBeneficiariosResuman
 
     public string? NombreProyectoCorto { get; set; }
 
+    public string? CveMunicipio { get; set; }
+
     public int? TotalBeneficiarios { get; set; }
 }

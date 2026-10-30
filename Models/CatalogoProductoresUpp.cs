@@ -21,6 +21,8 @@ public partial class CatalogoProductoresUpp
 
     public double? Longitud { get; set; }
 
+    public string? Ubicacion { get; set; }
+
     public short? TotalHato { get; set; }
 
     public short? TotalProbados { get; set; }
@@ -50,6 +52,8 @@ public partial class CatalogoProductoresUpp
     public virtual CatalogoLocalidade? CatalogoLocalidade { get; set; }
 
     public virtual CatalogoProductore? IdProductorNavigation { get; set; }
+
+    public virtual ICollection<ProduccionUpp> ProduccionUpps { get; set; } = new List<ProduccionUpp>();
 
     public virtual ICollection<SolicitudInternacion> SolicitudInternacions { get; set; } = new List<SolicitudInternacion>();
 
