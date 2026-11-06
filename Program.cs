@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using solicitudInternacion.Models;
+using solicitudInternacion.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<SedarpaContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IProductorUPPServices, ProductorUPPServices>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

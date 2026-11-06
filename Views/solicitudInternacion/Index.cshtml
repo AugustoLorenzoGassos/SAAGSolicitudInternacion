@@ -5,70 +5,131 @@
 }
 
 <!-- Modal para mostrar detalles de un beneficiario -->
-<div class="modal" id="modalBuscarUPP" tabindex="-1">
+<div class="modal fade" id="modalBuscarUPP" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalTitulo">Agregar UPP/PSG</h5>
+                <button type="button" class="btn-close" onclick="event.stopPropagation();cerrarModalUPP();" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body" id="modalCuerpo">
-
                 <div id="alertaAltaUPP">
                     <label class="alert alert-warning">
-                        <i class="fa fa-exclamation-triangle me-2" aria-hidden="true"></i>
-                        <span>La UPP/PSG que se mando a validar no exisste en el catálogo. Para continuar con el trámite deberá de ingresar los datos de la UPP/PSG</span>
-                        <span class="d-block text-center mt-3"><a href="#" class="text-decoration-none" onclick="ocultarSecciones();">Continuar con el trámite</a></span>
+                        @* <i class="fa fa-exclamation-triangle me-2" aria-hidden="true"></i> *@
+                        <span><i class="bi bi-info-circle me-2"></i>La UPP/PSG que se mando a validar no exisste en el catálogo. Para continuar con el trámite deberá de ingresar los datos de la UPP/PSG</span>
+                        <span class="d-block text-center mt-3"><a href="#" class="text-decoration-none" onclick="ocultarSecciones(event);">Continuar con el trámite</a></span>
                     </label>
                 </div>
-
                 <div id="datosAltaUPP" class="d-none">
-                    <div class="row">
-                        <div class="col-12 p-2"
-                            <label for="txtBuscarUPP">Clave de UPP/PSG:</label>
-                            <input type="text" id="txtBuscarUPP" class="form-control w-100 me-0 me-md-2" maxlenght="12" placeholder="Escibe la clave de la UPP/PSG" />
-                            @*<button type="button" class="btn btn-success mt-2 mt-md-0"><i class="fa fa-check me-2" aria-hidden="true"></i>Validar</button>*@
+                    <!--Tabs para el registro de la información-->
+                    <ul class="nav nav-tabs mt-3" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="productor-tab" data-bs-toggle="tab" data-bs-target="#productor-tab-pane" type="button" role="tab" aria-controls="desparasitacion-tab-pane" aria-selected="true">Productor</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="upp-tab" data-bs-toggle="tab" data-bs-target="#upp-tab-pane" type="button" role="tab" aria-controls="vacunacion-tab-pane" aria-selected="false">UPP/PSG</button>
+                        </li>
+                    </ul>
+                    <!--Sección con los datos de cada tab-->
+                    <div class="tab-content p-3" id="myTabContent">
+                        <div class="tab-pane fade show active" id="productor-tab-pane" role="tabpanel" aria-labelledby="productor-tab" tabindex="0">
+                            <!--Datos del productor-->
+                            <div class="row">
+                                <div class="col-12 p-2">
+                                    <label for="txtCURPProductor">CURP:</label>
+                                    <input type="text" id="txtCURPProductor" class="form-control w-100 me-0 me-md-2" maxlenght="100" placeholder="Escibe la CURP del productor" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-md-4">
+                                    <label for="txtNombreProductor">Nombre:</label>
+                                    <input type="text" id="txtNombreProductor" class="form-control" placeholder="Nombre del productor" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label for="txtApellidoPaternoProductor">Apellido paterno:</label>
+                                    <input type="text" id="txtApellidoPaternoProductor" class="form-control" placeholder="Apellido paterno del productor" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label for="txtApellidoMaternoProductor">Apellido materno:</label>
+                                    <input type="text" id="txtApellidoMaternoProductor" class="form-control" placeholder="Apellido materno del productor" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-md-4">
+                                    <label for="cmbGeneroProductor">Género:</label>
+                                    <select id="cmbGeneroProductor" class="form-select">
+                                        <option value="">Seleccione...</option>
+                                        <option value="M">Masculino</option>
+                                        <option value="F">Femenino</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label for="txtCorreoProductor">Correo electrónico:</label>
+                                    <input type="email" id="txtCorreoProductor" class="form-control" placeholder="Correo electrónico del productor" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label for="txtCelularProductor">Número de celular:</label>
+                                    <input type="text" id="txtCelularProductor" class="form-control" maxlength="10" placeholder="Número de celular del productor" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="upp-tab-pane" role="tabpanel" aria-labelledby="upp-tab" tabindex="0">
+                            <!--Datos de UPP/PSG-->
+                            <div class="row">
+                                <div class="col-12 col-md-4">
+                                    <label for="cmbUPPNuevaEstado">Estado:</label>
+                                    <select id="cmbUPPNuevaEstado" class="form-select">
+                                        <option value="00">Seleccione un estado...</option>
+                                        <option value="30">Veracruz</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label for="cmbUPPNuevaMunicipio">Municipio:</label>
+                                    <select id="cmbUPPNuevaMunicipio" class="form-select">
+                                        <option value="000">Seleccione un municipio...</option>
+                                        <option value="001">Acajate</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label for="cmbUPPNuevaLocalidad">Localidad:</label>
+                                    <select id="cmbUPPNuevaLocalidad" class="form-select">
+                                        <option value="0000">Seleccione una localidad...</option>
+                                        <option value="0001">Acajete</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-md-6">
+                                    <label for="txtUPPNueva">Clave de la UPP/PSG:</label>
+                                    <input type="text" id="txtUPPNueva" class="form-control w-100 me-0 me-md-2" readonly maxlenght="12" placeholder="Escibe la clave de la UPP/PSG" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="txtUPPNuevaNombre">Nombre de la UPP/PSG:</label>
+                                    <input type="text" id="txtUPPNuevaNombre" class="form-control w-100 me-0 me-md-2" placeholder="Escibe el nombre de la UPP/PSG" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-md-6">
+                                    <label for="txtUPPNuevaLatitud">Latitud:</label>
+                                    <input type="number" id="txtUPPNuevaLatitud" class="form-control w-100 me-0 me-md-2" step="0.0001" />
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="txtUPPNuevaLongitud">Longitud:</label>
+                                    <input type="number" id="txtUPPNuevaLongitud" class="form-control w-100 me-0 me-md-2" step="0.0001" />
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-12 p-2"
-                            <label for="nombreUPP">Nombre e la UPP/PSG:</label>
-                            <input type="text" id="nombreUPP" class="form-control w-100 me-0 me-md-2" maxlenght="12" placeholder="Escibeel nombre de la UPP/PSG" />
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-12 col-md-6 p-2"
-                            <label for="cmbMunicipio">Municipio:</label>
-                            <select id="cmbMunicipio" class="form-select">
-                                <option value="000">Seleccione el municipio ...</option>
-                            </select>
-                        </div>
-                        <div class="col-12 col-md-6 p-2"
-                            <label for="cmbLocalidad">Localidad:</label>
-                            <select id="cmbLocalidad" class="form-select">
-                                <option value="000">Seleccione la localidad ...</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-12 p-2"
-                            <label for="nombreProductor">Nombre del productor (<sup >*</sup>En caso de  no ser encintrado en la lista se agregaría al catálogo):</label>
-                            <input type="text" id="nombreProductor" class="form-control w-100 me-0 me-md-2" maxlenght="12" placeholder="Escibeel nombre de la UPP/PSG" />
-                            <table class="table table-dark mt-3">
-                                <thead>
-                                    <tr>
-                                        <th>Id</th>
-                                        <th>Nombre del productor</th>
-                                        <th>Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
+
                 </div>
             </div>
             <div class="modal-footer" id="modalPie">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" id="btnGuardarNuevaUPP" class="btn btn-secondary d-none" onclick="guardarUPP();" >
+                    <i class="bi bi-floppy me-2"></i>Guardar
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="event.stopPropagation();cerrarModalUPP();">
+                    <i class="bi bi-x-circle me-2"></i>Cerrar
+                </button>
             </div>
         </div>
     </div>
@@ -286,12 +347,3 @@
     </div>
 
 </form>
-
-<script>
-
-    function ocultarSecciones(){
-        document.getElementById('alertaAltaUPP').classList.add('d-none');
-        document.getElementById('datosAltaUPP').classList.remove("d-none");
-    }
-
-</script>

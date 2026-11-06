@@ -1,107 +1,28 @@
 ﻿using Microsoft.AspNetCore.Http;
-using System.IO;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using solicitudInternacion.Models;
-using solicitudInternacion.ViewModels;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
-
+using solicitudInternacion.Models;
+using solicitudInternacion.Models.DTOs;
+using solicitudInternacion.Services;
+using solicitudInternacion.ViewModels;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace solicitudInternacion.Controllers
 {
     public class solicitudInternacionController : Controller
     {
         private readonly SedarpaContext _context;
+        private readonly IProductorUPPServices _productorUppService;
 
-        public solicitudInternacionController(SedarpaContext context)
+        public solicitudInternacionController(SedarpaContext context, IProductorUPPServices productorUppService)
         {
             _context = context;
+            _productorUppService = productorUppService;
         }
 
-        public async Task<IActionResult> ObtenerDocumentos()
-        {
-            try
-            {
-                // Se seleccionan solo los campos necesarios para aligerar la respuesta JSON
-                var documentos = await _context.CatalogoDocumentos
-                    .Select(l => new
-                    {
-                        l.IdDocumento,
-                        l.DescDocumento
-                    })
-                    .OrderBy(l => l.DescDocumento)
-                    .ToListAsync();
-
-                return Json(documentos);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { mensaje = "Error al obtener documentos", detalle = ex.Message });
-            }
-        }
-
-        public async Task<IActionResult> ObtenerProductores()
-        {
-            try
-            {
-                // Se seleccionan solo los campos necesarios para aligerar la respuesta JSON
-                var productores = await _context.CatalogoProductores
-                    .Select(p => new
-                    {
-                        p.IdProductor,
-                        p.NombreProductor,
-                        p.ApellidoPaternoProductor,
-                        p.ApellidoMaternoProductor
-                    })
-                    .OrderBy(p => p.NombreProductor)
-                    .ToListAsync();
-
-                return Json(productores);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { mensaje = "Error al obtener productores", detalle = ex.Message });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> buscarUPP(string id) {
-
-            try
-            {
-
-                var Upp = await _context.CatalogoProductoresUpps
-                    .Select(upp => new
-                    {
-                        upp.ClaveUpp,
-                        nombreProductor = upp.IdProductorNavigation.NombreProductor + " " + upp.IdProductorNavigation.ApellidoPaternoProductor + " " + upp.IdProductorNavigation.ApellidoMaternoProductor,
-                        nombrePredio = upp.NombreUpp.ToUpper(),
-                        ubicacion = upp.Ubicacion != null ? upp.Ubicacion.ToUpper() : "Sin dato",
-                        nombreMunicipio = upp.CatalogoLocalidade.ClaveMunicipioNavigation.NombreMunicipio.ToUpper(),
-                        nombreLocalidad = upp.CatalogoLocalidade.NombreLocalidad,
-                        nombreEstado = _context.CatalogoEntidadesFederativas
-                            .Where(e => e.ClaveEstado == upp.ClaveUpp.Substring(0, 2))
-                            .Select(e => e.NombreEstado.ToUpper())
-                            .FirstOrDefault(),
-                        upp.CatalogoLocalidade.ClaveMunicipioNavigation.TipoZona,
-                        tipoEstatus = "SIN DATO"
-                    })
-                    .Where(c => c.ClaveUpp == id)
-                    .FirstOrDefaultAsync();
-                if (Upp == null)
-                {
-                    return NotFound(new { mensaje = "No se encontró la UPP/PSG (" + id + ")" });
-                }
-                return Json(Upp);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { mensaje = "Error al obtener laboratorios", detalle = ex.Message });
-            }
-
-        }
-
+        /*** Método para ola carga inicial de la solicitud y apertura del registro ****/
         public ActionResult Index()
         {
 
@@ -114,6 +35,7 @@ namespace solicitudInternacion.Controllers
 
         }
 
+        /*** Método para guardar la solicitud y redirigir a la carga de documentos ****/
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Index(SolicitudInternacion solicitudInternacion)
@@ -127,6 +49,7 @@ namespace solicitudInternacion.Controllers
             return View(solicitudInternacion);
         }
 
+        /*** Método para la carga de la vista de documentos ****/
         public ActionResult solicitudInternacionDocumentos(int id)
         {
             var solicitud = _context.SolicitudInternacions.Find(id);
@@ -137,6 +60,7 @@ namespace solicitudInternacion.Controllers
             return View(solicitud);
         }
 
+        /*** Método para la carga de documentos ****/
         [HttpPost]
         public async Task<IActionResult> SubirDocumento(IFormFile archivo, int idDocumento, int idSolicitud, string observaciones)
         {
@@ -190,6 +114,7 @@ namespace solicitudInternacion.Controllers
             }
         }
 
+        /**** método para obtener los documentos cargados de la solicitud ****/
         public async Task<IActionResult> SolicitudDocumentosCargados(int idSolicitud)
         {
             try
@@ -213,7 +138,9 @@ namespace solicitudInternacion.Controllers
             }
         }
 
-        public async Task<ActionResult> solicitudInternacionCerrarTramite(int id) { 
+        /*** método para cerrar la solicitud y redirigir a la página de cierre ****/
+        public async Task<ActionResult> solicitudInternacionCerrarTramite(int id)
+        {
 
             /*var solicitud = await _context.SolicitudInternacions
                 .Where (s => s.IdSolicitudInternacion == id)
@@ -245,6 +172,70 @@ namespace solicitudInternacion.Controllers
             return View(solicitudModel);
         }
 
+        /*** método para obtener los datos de la UPP/PSG ****/
+        [HttpGet]
+        public async Task<IActionResult> buscarUPP(string id) {
+
+            try
+            {
+
+                var Upp = await _context.CatalogoProductoresUpps
+                    .Select(upp => new
+                    {
+                        upp.ClaveUpp,
+                        nombreProductor = upp.IdProductorNavigation.NombreProductor + " " + upp.IdProductorNavigation.ApellidoPaternoProductor + " " + upp.IdProductorNavigation.ApellidoMaternoProductor,
+                        nombrePredio = upp.NombreUpp.ToUpper(),
+                        ubicacion = upp.Ubicacion != null ? upp.Ubicacion.ToUpper() : "Sin dato",
+                        nombreMunicipio = upp.CatalogoLocalidade.ClaveMunicipioNavigation.NombreMunicipio.ToUpper(),
+                        nombreLocalidad = upp.CatalogoLocalidade.NombreLocalidad,
+                        nombreEstado = _context.CatalogoEntidadesFederativas
+                            .Where(e => e.ClaveEstado == upp.ClaveUpp.Substring(0, 2))
+                            .Select(e => e.NombreEstado.ToUpper())
+                            .FirstOrDefault(),
+                        upp.CatalogoLocalidade.ClaveMunicipioNavigation.TipoZona,
+                        tipoEstatus = "SIN DATO"
+                    })
+                    .Where(c => c.ClaveUpp == id)
+                    .FirstOrDefaultAsync();
+                if (Upp == null)
+                {
+                    return NotFound(new { mensaje = "No se encontró la UPP/PSG (" + id + ")" });
+                }
+                return Json(Upp);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensaje = "Error al obtener laboratorios", detalle = ex.Message });
+            }
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GuardarProductorUPP([FromBody] productorUppDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { success = false, message = "Datos no válidos." });
+            }
+
+            try
+            {
+                bool resultado = await _productorUppService.GuardarProductorConUppAsync(dto);
+
+                if (resultado)
+                {
+                    return Json(new { success = true, message = "Productor y UPP guardados correctamente." });
+                }
+
+                return BadRequest(new { success = false, message = "No se pudo registrar la información." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Error interno.", error = ex.Message });
+            }
+        }
+
+        /*** método para mostrar al usuario el status de su solicitud ****/
         public async Task<IActionResult> solicitudInternacionSeguimiento(int id) {
             return View();
         }

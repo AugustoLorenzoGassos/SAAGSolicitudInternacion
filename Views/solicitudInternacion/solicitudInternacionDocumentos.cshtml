@@ -3,49 +3,49 @@
     ViewData["Title"] = "Permisos de internación - Cargar documentos";
 }
 
-    <div class="container mt-3">
-        <div class="card">
-            <div class="card-header bg-secondary bg-gradient text-white rounded-top-2">
-                <h4 class="m-0">Permisos de internación - Cargar de documentos</h4>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-12 col-md-6">
-                        <select id="cmbDocumentos" class="form-select"></select>
-                    </div>
-                    <div class="col-12 mt-2 mt-md-0 col-md-6">
-                        <div class="upload-container">
-                            <input type="file" id="documentoInput" class="file-input-hidden" accept=".jpg, .jpeg, .png, .pdf" onchange="mostrarNombreArchivo()">
-                            <label for="documentoInput" class="btn-search bg-secondary">
-                                <i class="fa-solid fa-magnifying-glass"></i>
-                                Buscar documento
-                            </label>
-                            <span id="nombreArchivo" class="file-name">Ningún archivo seleccionado</span>
-                        </div>
-                    </div>
+<div class="container mt-3">
+    <div class="card">
+        <div class="card-header bg-secondary bg-gradient text-white rounded-top-2">
+            <h4 class="m-0">Permisos de internación - Cargar de documentos</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-md-6">
+                    <select id="cmbDocumentos" class="form-select"></select>
                 </div>
-                <textarea id="observaciones" class="form-control mt-3 d-none" rows="3" placeholder="Observaciones (opcional)"></textarea>
-            <label id="resultado" class="p-3 alert w-100 mt-2 text-center alert alert-secondary"><i class="fa fa-pause me-3" aria-hidden="true"></i>En espera de subir un documento</label>
-                <div class="container-fluid d-flex flex-column flex-md-row w-100 justify-content-start">
-                    <div class="me-md-2">
-                        <button id="BtnSubir" type="button" class="btn btn-secondary disabled mt-3 me-2 w-100 w-md-auto" onclick="subirDocumento()">
-                            <i class="fa fa-upload me-2" aria-hidden="true"></i>Subir documento
-                        </button>
-                    </div>
-                    <div class="mt-2 mt-md-0">
-                        <a href="@Url.Action("solicitudInternacionCerrarTramite", "solicitudInternacion", new { id = Model.IdSolicitudInternacion })" class="btn btn-secondary mt-3 me-2 w-100 w-md-auto">
-                            <i class="fa fa-bars me-3" aria-hidden="true"></i>Finalizar tramite
-                        </a>
+                <div class="col-12 mt-2 mt-md-0 col-md-6">
+                    <div class="upload-container">
+                        <input type="file" id="documentoInput" class="file-input-hidden" accept=".jpg, .jpeg, .png, .pdf" onchange="mostrarNombreArchivo()">
+                        <label for="documentoInput" class="btn-search bg-secondary">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            Buscar documento
+                        </label>
+                        <span id="nombreArchivo" class="file-name">Ningún archivo seleccionado</span>
                     </div>
                 </div>
             </div>
-            <div class="card-footer">
-                <p id="mensajeDocumentos" class="alert alert-dark p-2 text-center mt-2">Documentos cargados</p>
-                <ul id="listaDocumentos" class="list-group d-none">
-                </ul>
+            <textarea id="observaciones" class="form-control mt-3 d-none" rows="3" placeholder="Observaciones (opcional)"></textarea>
+        <label id="resultado" class="p-3 alert w-100 mt-2 text-center alert alert-secondary"><i class="fa fa-pause me-3" aria-hidden="true"></i>En espera de subir un documento</label>
+            <div class="container-fluid d-flex flex-column flex-md-row w-100 justify-content-start">
+                <div class="me-md-2">
+                    <button id="BtnSubir" type="button" class="btn btn-secondary disabled mt-3 me-2 w-100 w-md-auto" onclick="subirDocumento()">
+                        <i class="fa fa-upload me-2" aria-hidden="true"></i>Subir documento
+                    </button>
+                </div>
+                <div class="mt-2 mt-md-0">
+                    <a href="@Url.Action("solicitudInternacionCerrarTramite", "solicitudInternacion", new { id = Model.IdSolicitudInternacion })" class="btn btn-secondary mt-3 me-2 w-100 w-md-auto">
+                        <i class="fa fa-bars me-3" aria-hidden="true"></i>Finalizar tramite
+                    </a>
+                </div>
             </div>
         </div>
+        <div class="card-footer">
+            <p id="mensajeDocumentos" class="alert alert-dark p-2 text-center mt-2">Documentos cargados</p>
+            <ul id="listaDocumentos" class="list-group d-none">
+            </ul>
+        </div>
     </div>
+</div>
 
 <script>
 
@@ -155,7 +155,5 @@
         }
     }
 
-    function cerrarTramite(){
-        
-    }
+
 </script>
