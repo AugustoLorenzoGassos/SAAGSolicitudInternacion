@@ -91,16 +91,12 @@
 
             if (response.ok) {
                 const resultado = await response.json();
-                //document.getElementById('resultado').classList.remove('alert-warning');
-                //document.getElementById('resultado').classList.add('alert-success');
-                document.getElementById('resultado').innerHTML = "<i class='fa fa-check me-2' aria-hidden='true'></i> Archivo cargado correctamente.";
+                document.getElementById('resultado').innerHTML = "<i class='fa fa-check me-2' aria-hidden='true'></i> " + resultado.mensaje;
                 cargarListaDocumentos();
                 document.getElementById('nombreArchivo').innerHTML = "Ningún archivo seleccionado."
                 cargarDocumetos();
             } else {
                 const error = await response.json();
-                //document.getElementById('resultado').classList.add('alert-warning');
-                //document.getElementById('resultado').classList.remove('alert-success');
                 document.getElementById('resultado').innerHTML = resultado.mensaje || "<i class='fa fa-exclamation-triangle me-2' aria-hidden='true'></i> Ocurrió un problema al subir el archivo.";
             }
         } catch (err) {

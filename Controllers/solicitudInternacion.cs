@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure;
 using solicitudInternacion.Models;
 using solicitudInternacion.Models.DTOs;
 using solicitudInternacion.Services;
@@ -15,18 +16,29 @@ namespace solicitudInternacion.Controllers
     {
         private readonly SedarpaContext _context;
         private readonly IProductorUPPServices _productorUppService;
+        private readonly ISolicitudInternacion _solicitudInternacionService;
+        private readonly IUpp _UppServices;
+        private readonly ISolicitudInternacionDocumentos _solicitudInternacionDocumentosService;
 
-        public solicitudInternacionController(SedarpaContext context, IProductorUPPServices productorUppService)
+        public solicitudInternacionController(
+            SedarpaContext context, 
+            IProductorUPPServices productorUppService, 
+            ISolicitudInternacion solicitudInternacionService,
+            IUpp UppServices,
+            ISolicitudInternacionDocumentos solicitudInternacionDocumentosService)
         {
             _context = context;
             _productorUppService = productorUppService;
+            _solicitudInternacionService = solicitudInternacionService;
+            _UppServices = UppServices;
+            _solicitudInternacionDocumentosService = solicitudInternacionDocumentosService;
         }
 
-        /*** Método para ola carga inicial de la solicitud y apertura del registro ****/
+        /*** Método para la carga inicial de la solicitud y apertura del registro ****/
         public ActionResult Index()
         {
 
-            var registro = new SolicitudInternacion();
+            var registro = new solicitudInternacionDto();
             registro.FechaCaptura = DateTime.Now;
             registro.StatusSolicitud = 1;
             registro.FechaRecepcion = DateTime.Now;
@@ -35,18 +47,47 @@ namespace solicitudInternacion.Controllers
 
         }
 
-        /*** Método para guardar la solicitud y redirigir a la carga de documentos ****/
+        /*** método para obtener los datos de la UPP/PSG ****/
+        [HttpGet]
+        public async Task<IActionResult> buscarUPP(string id)
+        {
+
+            try
+            {
+                var Upp = await _UppServices.ObtenerUppPorClaveAsync(id);
+                if (Upp == null)
+                {
+                    return NotFound(new { mensaje = "No se encontró la UPP/PSG (" + id + ")" });
+                }
+                return Json(Upp);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensaje = "Error al obtener laboratorios", detalle = ex.Message });
+            }
+
+        }
+
+        /*** Método que llama al servicio para guardar la solicitud del permiso de internación y redirige a la carga de los documentos ***/
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Index(SolicitudInternacion solicitudInternacion)
+        public async Task<IActionResult> Index([FromForm] solicitudInternacionDto dto)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.SolicitudInternacions.Add(solicitudInternacion);
-                _context.SaveChanges();
-                return RedirectToAction("solicitudInternacionDocumentos", new { id = solicitudInternacion.IdSolicitudInternacion });
+                return View(dto);
             }
-            return View(solicitudInternacion);
+            
+            try
+            {
+                int nuevaSolicitud = await _solicitudInternacionService.GuardarSolicitudInternacionAsync(dto);
+                return RedirectToAction("solicitudInternacionDocumentos", new { id = nuevaSolicitud });
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, "No se pudo guardar la solicitud. Intente nuevamente. Error: " + ex.Message);
+                return View(dto);
+            }
         }
 
         /*** Método para la carga de la vista de documentos ****/
@@ -64,49 +105,15 @@ namespace solicitudInternacion.Controllers
         [HttpPost]
         public async Task<IActionResult> SubirDocumento(IFormFile archivo, int idDocumento, int idSolicitud, string observaciones)
         {
-            // 1. Validar que se haya recibido un archivo
-            if (archivo == null || archivo.Length == 0)
-            {
-                return BadRequest(new { mensaje = "No se ha seleccionado ningún archivo válido." });
-            }
-
             try
             {
-                // 2. Definir la ruta donde se guardará (ejemplo: wwwroot/uploads)
-                string rutaCarpeta = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-
-                // Crear la carpeta si no existe
-                if (!Directory.Exists(rutaCarpeta))
+                bool guardadoExitoso = await _solicitudInternacionService.SubirDocumentoAsync(archivo, idDocumento, idSolicitud, observaciones);
+                if (!guardadoExitoso)
                 {
-                    Directory.CreateDirectory(rutaCarpeta);
+                    return BadRequest(new { mensaje = "No se pudo procesar el archivo." });
                 }
+                return Ok(new { mensaje = "Documento guardado exitosamente." });
 
-                // Generar la ruta completa con el nombre original del archivo
-
-                string nombreArchivo = idSolicitud.ToString() + "_" + _context.CatalogoDocumentos.Find(idDocumento)?.DescDocumentoCorto + Path.GetExtension(archivo.FileName);
-                string rutaCompleta = Path.Combine(rutaCarpeta, nombreArchivo);
-
-                // 3. Guardar el archivo en el servidor
-                using (var stream = new FileStream(rutaCompleta, FileMode.Create))
-                {
-                    await archivo.CopyToAsync(stream);
-                }
-
-                string tipoMime = archivo.ContentType;
-
-                //Generar el registro en la base de datos
-                var documento = new SolicitudInternacionDocumento()
-                {
-                    IdDocumento = idDocumento,
-                    IdSolicitudInternacion = idSolicitud,
-                    NombreDocumento = nombreArchivo,
-                    Observaciones = observaciones,
-                    FechaCarga = DateTime.Now,
-                    TipoMime = tipoMime
-                };
-                _context.SolicitudInternacionDocumentos.Add(documento);
-                await _context.SaveChangesAsync();
-                return Ok(new { mensaje = "Documento guardado exitosamente.", ruta = rutaCompleta });
             }
             catch (System.Exception ex)
             {
@@ -119,17 +126,7 @@ namespace solicitudInternacion.Controllers
         {
             try
             {
-                var documentosCargados = await _context.SolicitudInternacionDocumentos
-                    .Where(d => d.IdSolicitudInternacion == idSolicitud)
-                    .Select(d => new
-                    {
-                        d.IdDocumento,
-                        d.NombreDocumento,
-                        d.Observaciones,
-                        tipoDocumento = d.IdDocumentoNavigation.DescDocumento,
-                        d.FechaCarga
-                    })
-                    .ToListAsync();
+                var documentosCargados = await _solicitudInternacionDocumentosService.ObtenerDocumentosPorSolicitudAsync(idSolicitud);
                 return Json(documentosCargados);
             }
             catch (Exception ex)
@@ -142,71 +139,28 @@ namespace solicitudInternacion.Controllers
         public async Task<ActionResult> solicitudInternacionCerrarTramite(int id)
         {
 
-            /*var solicitud = await _context.SolicitudInternacions
-                .Where (s => s.IdSolicitudInternacion == id)
-                .FirstOrDefaultAsync();*/
+            var registroSolicitud = await _solicitudInternacionService.ObtenerSolicitudInternacionAsync(id);
+            if (registroSolicitud == null)
+            {
+                return NotFound($"No se encontró la solicitud con ID {id}");
+            }
 
-            var registroSolicitud = await _context.SolicitudInternacions.FirstOrDefaultAsync(s => s.IdSolicitudInternacion == id);
+            var registroProductorOrigen = await _UppServices.LeerRegistroUPP(registroSolicitud.Origen!);
+            var registroProductorDestino = await _UppServices.LeerRegistroUPP(registroSolicitud.Destino!);
 
-            var registroProductor = await _context.CatalogoProductoresUpps
-                                        .Where(upp => upp.ClaveUpp == registroSolicitud.Origen)
-                                        .Include(p => p.IdProductorNavigation)
-                                        .Include(l => l.CatalogoLocalidade)
-                                            .ThenInclude(m => m.ClaveMunicipioNavigation)
-                                        .FirstOrDefaultAsync();
-
-            var registroProductorDestino = await _context.CatalogoProductoresUpps
-                                            .Where(upp => upp.ClaveUpp == registroSolicitud.Destino)
-                                            .Include(p => p.IdProductorNavigation)
-                                            .Include(l => l.CatalogoLocalidade)
-                                                .ThenInclude(m => m.ClaveMunicipioNavigation)
-                                            .FirstOrDefaultAsync();
+            if (registroProductorOrigen == null || registroProductorDestino == null)
+            {
+                return NotFound("No se encontró la información de la UPP de Origen o Destino asociada a la solicitud.");
+            }
 
             var solicitudModel = new datosSolicitud
             {
                 solicitud = registroSolicitud,
-                productor = registroProductor,
+                productor = registroProductorOrigen,
                 productorDestino = registroProductorDestino
             };
 
             return View(solicitudModel);
-        }
-
-        /*** método para obtener los datos de la UPP/PSG ****/
-        [HttpGet]
-        public async Task<IActionResult> buscarUPP(string id) {
-
-            try
-            {
-
-                var Upp = await _context.CatalogoProductoresUpps
-                    .Select(upp => new
-                    {
-                        upp.ClaveUpp,
-                        nombreProductor = upp.IdProductorNavigation.NombreProductor + " " + upp.IdProductorNavigation.ApellidoPaternoProductor + " " + upp.IdProductorNavigation.ApellidoMaternoProductor,
-                        nombrePredio = upp.NombreUpp.ToUpper(),
-                        ubicacion = upp.Ubicacion != null ? upp.Ubicacion.ToUpper() : "Sin dato",
-                        nombreMunicipio = upp.CatalogoLocalidade.ClaveMunicipioNavigation.NombreMunicipio.ToUpper(),
-                        nombreLocalidad = upp.CatalogoLocalidade.NombreLocalidad,
-                        nombreEstado = _context.CatalogoEntidadesFederativas
-                            .Where(e => e.ClaveEstado == upp.ClaveUpp.Substring(0, 2))
-                            .Select(e => e.NombreEstado.ToUpper())
-                            .FirstOrDefault(),
-                        upp.CatalogoLocalidade.ClaveMunicipioNavigation.TipoZona,
-                        tipoEstatus = "SIN DATO"
-                    })
-                    .Where(c => c.ClaveUpp == id)
-                    .FirstOrDefaultAsync();
-                if (Upp == null)
-                {
-                    return NotFound(new { mensaje = "No se encontró la UPP/PSG (" + id + ")" });
-                }
-                return Json(Upp);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { mensaje = "Error al obtener laboratorios", detalle = ex.Message });
-            }
 
         }
 
@@ -239,6 +193,18 @@ namespace solicitudInternacion.Controllers
         public async Task<IActionResult> solicitudInternacionSeguimiento(int id) {
             return View();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> validarCURP(string id)
+        {
+            var productor = await _solicitudInternacionService.ValidarCURPAsync(id);
+            if (productor != null)
+            {
+                return Ok(new { exists = true, data = productor });
+            }
+            return Ok(new { exists = false });
+        }
+
     }
 }
 

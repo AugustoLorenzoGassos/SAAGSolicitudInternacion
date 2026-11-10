@@ -15,10 +15,10 @@
                     <div class="row align-items-center">
                         <div class="col-12 col-md-6 alert alert-success">
 
-                            <span class="d-block p-2 text-center"><strong>Estimado: @Model.productor.IdProductorNavigation.NombreProductor @Model.productor.IdProductorNavigation.ApellidoPaternoProductor @Model.productor.IdProductorNavigation.ApellidoMaternoProductor</strong></span>
-                            <span class="d-block p-2">Su trámite con folio <strong>@Model.solicitud.IdSolicitudInternacion</strong> fue recibido. Se le estarán haciendo llegar notificaciones de la atención al <strong>correo electrónico @Model.solicitud.CorreoElectronico</strong> y/o al <strong>número de celular @Model.solicitud.NumeroCelular</strong></span>
-                            <span class="d-block p-2 ms-2"><strong><i class="fa fa-step-backward me-2" aria-hidden="true"></i>Origen:</strong> @Model.solicitud.Origen el el municipio: @Model.productor.CatalogoLocalidade.ClaveMunicipioNavigation.NombreMunicipio y localidad: @Model.productor.CatalogoLocalidade.NombreLocalidad</span>
-                            <span class="d-block p-2 ms-2"><strong><i class="fa fa-step-forward me-2" aria-hidden="true"></i>Destino:</strong> @Model.solicitud.Destino el el municipio: @Model.productorDestino.CatalogoLocalidade.ClaveMunicipioNavigation.NombreMunicipio y localidad: @Model.productorDestino.CatalogoLocalidade.NombreLocalidad</span>
+                            <span class="d-block p-2 text-center"><strong>Estimado: @Model.productor?.NombreProductor @Model.productor?.ApellidoPaternoProductor @Model.productor?.ApellidoMaternoProductor</strong></span>
+                            <span class="d-block p-2">Su trámite con folio <strong>@Model.solicitud?.IdSolicitudInternacion</strong> fue recibido. Se le estarán haciendo llegar notificaciones de la atención al <strong>correo electrónico @Model.solicitud?.CorreoElectronico</strong> y/o al <strong>número de celular @Model.solicitud?.NumeroCelular</strong></span>
+                            <span class="d-block p-2 ms-2"><strong><i class="fa fa-step-backward me-2" aria-hidden="true"></i>Origen:</strong> @Model.solicitud?.Origen el el municipio: @Model.productor?.NombreMunicipio y localidad: @Model.productor?.NombreLocalidad</span>
+                            <span class="d-block p-2 ms-2"><strong><i class="fa fa-step-forward me-2" aria-hidden="true"></i>Destino:</strong> @Model.solicitud?.Destino el el municipio: @Model.productorDestino?.NombreMunicipio y localidad: @Model.productorDestino?.NombreLocalidad</span>
 
                         </div>
 
@@ -45,7 +45,7 @@
     document.addEventListener("DOMContentLoaded", function() {
         // Generar la URL a la que apuntará el QR (ej. la ruta de seguimiento de tu app)
         // Usamos el ID o la clave de la solicitud para que el enlace sea único
-        var urlSeguimiento = "@Url.Action("solicitudInternacionSeguimiento", "solicitudInternacion", new { id = Model.solicitud.IdSolicitudInternacion }, Context.Request.Scheme)";
+        var urlSeguimiento = "@Url.Action("solicitudInternacionSeguimiento", "solicitudInternacion", new { id = Model.solicitud?.IdSolicitudInternacion }, Context.Request.Scheme)";
 
         // Crear el código QR dentro del div 'qrcode'
         var qrcode = new QRCode(document.getElementById("qrcode"), {

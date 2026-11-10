@@ -29,7 +29,7 @@ namespace solicitudInternacion.Services
                     // 2. Crear nuevo Productor
                     productor = new CatalogoProductore
                     {
-                        CurpProductor = dto.curpProductor.ToUpper(),
+                        CurpProductor = dto.curpProductor?.ToUpper(),
                         NombreProductor = dto.nombreProductor?.ToUpper(),
                         ApellidoPaternoProductor = dto.apellidoPaternoProductor?.ToUpper(),
                         ApellidoMaternoProductor = dto.apellidoMaternoProductor?.ToUpper(),
@@ -41,7 +41,7 @@ namespace solicitudInternacion.Services
                     await _context.SaveChangesAsync();
                 }
 
-                var upp = new CatalogoProductoresUpp
+                var upp = new Models.CatalogoProductoresUpp
                 {
                     ClaveUpp = dto.claveUpp,
                     NombreUpp = dto.nombreUpp?.ToUpper(),
@@ -60,6 +60,7 @@ namespace solicitudInternacion.Services
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 await transaction.RollbackAsync();
                 throw;
             }

@@ -1,12 +1,13 @@
 ﻿using solicitudInternacion.Models;
+using solicitudInternacion.Models.DTOs;
 
 namespace solicitudInternacion.ViewModels
 {
     public class datosSolicitud
     {
-        public SolicitudInternacion solicitud {  get; set; }
-        public CatalogoProductoresUpp productor { get; set; }
-        public CatalogoProductoresUpp productorDestino { get; set; }
+        public solicitudInternacionDto? solicitud {  get; set; }
+        public CatalogoProductoresUppDto? productor { get; set; }
+        public CatalogoProductoresUppDto? productorDestino { get; set; }
 
     }
 }

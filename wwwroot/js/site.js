@@ -548,3 +548,46 @@ function guardarUPP() {
     }
     
 }
+
+async function validarCURP(curp) {
+
+    if (!curp || curp.trim() === '') return;
+
+    try {
+
+        const response = await fetch(`/solicitudInternacion/validarCURP/${encodeURIComponent(curp)}`);
+        const result = await response.json();
+        alert(result.exists);
+        alert(response.data);
+        if (result.exists && result.data) {
+            const p = result.data;
+            document.getElementById('txtNombreProductor').value = p.nombreProductor || '';
+            document.getElementById('txtApellidoPaternoProductor').value = p.apellidoPaternoProductor || '';
+            document.getElementById('txtApellidoMaternoProductor').value = p.apellidoMaternoProductor || '';
+            document.getElementById('txtCorreoProductor').value = p.correoProductor || '';
+            document.getElementById('txtCelularProductor').value = p.telefonoProductor || '';
+            const optionGenero = document.querySelector(`#cmbGeneroProductor option[value="${p.generoProductor}"]`);
+            if (optionGenero) {
+                optionGenero.selected = true;
+                document.querySelector('#cmbGeneroProductor').dispatchEvent(new Event('change'));
+            }
+
+        } else {
+            //Limpiar campos de productor
+            document.getElementById('txtNombreProductor').value = '';
+            document.getElementById('txtApellidoPaternoProductor').value = '';
+            document.getElementById('txtApellidoMaternoProductor').value = '';
+            document.getElementById('txtCorreoProductor').value = '';
+            document.getElementById('txtCelularProductor').value = '';
+            const optionGenero = document.querySelector('#cmbGeneroProductor option[value=""]');
+            if (optionGenero) {
+                optionGenero.selected = true;
+                document.querySelector('#cmbGeneroProductor').dispatchEvent(new Event('change'));
+            }
+        }
+
+    } catch (error) {
+        console.log('Error al validar la CURP:', error);
+    }
+
+}

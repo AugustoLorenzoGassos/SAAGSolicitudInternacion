@@ -9,6 +9,9 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<SedarpaContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IProductorUPPServices, ProductorUPPServices>();
+builder.Services.AddScoped<ISolicitudInternacion, SolicitudInternacionServices>();
+builder.Services.AddScoped<IUpp, UppServices>();
+builder.Services.AddScoped<ISolicitudInternacionDocumentos, SolicitudInternacionDocumentosServices>();
 
 var app = builder.Build();
 

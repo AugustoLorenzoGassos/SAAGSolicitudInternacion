@@ -1,4 +1,4 @@
-﻿@model solicitudInternacion.Models.SolicitudInternacion
+﻿@model solicitudInternacion.Models.DTOs.solicitudInternacionDto;
 
 @{
     ViewData["Title"] = "Permisos de internación - Solicitud en línea";
@@ -37,7 +37,7 @@
                             <div class="row">
                                 <div class="col-12 p-2">
                                     <label for="txtCURPProductor">CURP:</label>
-                                    <input type="text" id="txtCURPProductor" class="form-control w-100 me-0 me-md-2" maxlenght="100" placeholder="Escibe la CURP del productor" />
+                                    <input type="text" id="txtCURPProductor" class="form-control w-100 me-0 me-md-2" maxlenght="100" placeholder="Escibe la CURP del productor" onblur="validarCURP(this.value)" />
                                 </div>
                             </div>
                             <div class="row">
